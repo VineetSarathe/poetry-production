@@ -113,10 +113,18 @@ export default function Poems() {
 
   /* ================= IMAGE FORMAT ================= */
 
+  // const formatImageSrc = (img) => {
+  //   if (!img || img === "") return "/images/faiz.png";
+  //   if (img.startsWith("http")) return img;
+  //   return `http://localhost:5000/${img.replace(/^\/+/, "")}`;
+  // };
+
+  const BASE_URL = import.meta.env.VITE_API_BASE;
+
   const formatImageSrc = (img) => {
     if (!img || img === "") return "/images/faiz.png";
     if (img.startsWith("http")) return img;
-    return `http://localhost:5000/${img.replace(/^\/+/, "")}`;
+    return `${BASE_URL}/${img.replace(/^\/+/, "")}`;
   };
 
   /* ================= UI ================= */

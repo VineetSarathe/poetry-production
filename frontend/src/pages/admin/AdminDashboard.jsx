@@ -1,8 +1,9 @@
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import { PoemsContext } from "../../context/PoemsContext";
 import { Link } from "react-router-dom";
+import api from "../../api";
 
 /* ---------------- TITLES ---------------- */
 
@@ -111,7 +112,10 @@ const AdminDashboard = () => {
     } else if (editImageUrl) {
       setEditPreview(editImageUrl);
     } else if (editingPoet) {
-      setEditPreview(`http://localhost:5000${editingPoet.image}`);
+      // setEditPreview(`http://localhost:5000${editingPoet.image}`);
+      setEditPreview(
+        `${import.meta.env.VITE_API_BASE}/${editingPoet.image.replace(/^\/+/, "")}`
+      );
     }
   }, [editImageFile, editImageUrl, editingPoet]);
 
@@ -122,13 +126,23 @@ const AdminDashboard = () => {
     loadPosters();
   }, []);
 
+  // const loadPoets = async () => {
+  //   const res = await axios.get("http://localhost:5000/api/poets");
+  //   setPoets(res.data);
+  // };
+
   const loadPoets = async () => {
-    const res = await axios.get("http://localhost:5000/api/poets");
+    const res = await api.get("/poets");
     setPoets(res.data);
   };
 
+  // const loadPosters = async () => {
+  //   const res = await axios.get("http://localhost:5000/api/posters");
+  //   setPosters(res.data);
+  // };
+
   const loadPosters = async () => {
-    const res = await axios.get("http://localhost:5000/api/posters");
+    const res = await api.get("/posters");
     setPosters(res.data);
   };
 
@@ -145,8 +159,14 @@ const AdminDashboard = () => {
       const fd = new FormData();
       fd.append("image", posterFile);
 
-      await axios.post(
-        "http://localhost:5000/api/posters/add",
+      // await axios.post(
+      //   "http://localhost:5000/api/posters/add",
+      //   fd,
+      //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+      // );
+
+      await api.post(
+        "/posters/add",
         fd,
         { headers: { Authorization: localStorage.getItem("adminToken") } }
       );
@@ -174,8 +194,14 @@ const AdminDashboard = () => {
       const fd = new FormData();
       fd.append("image", posterFile);
 
-      await axios.put(
-        `http://localhost:5000/api/posters/${id}`,
+      // await axios.put(
+      //   `http://localhost:5000/api/posters/${id}`,
+      //   fd,
+      //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+      // );
+
+      await api.put(
+        `/posters/${id}`,
         fd,
         { headers: { Authorization: localStorage.getItem("adminToken") } }
       );
@@ -197,8 +223,13 @@ const AdminDashboard = () => {
 
     setPosterLoading(true);
     try {
-      await axios.delete(
-        `http://localhost:5000/api/posters/${id}`,
+      // await axios.delete(
+      //   `http://localhost:5000/api/posters/${id}`,
+      //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+      // );
+
+      await api.delete(
+        `/posters/${id}`,
         { headers: { Authorization: localStorage.getItem("adminToken") } }
       );
       setMessage("🗑 Poster deleted");
@@ -222,8 +253,14 @@ const AdminDashboard = () => {
     if (imageFile) fd.append("image", imageFile);
     else if (imageUrl) fd.append("imageUrl", imageUrl);
 
-    await axios.post(
-      "http://localhost:5000/api/poets/add",
+    // await axios.post(
+    //   "http://localhost:5000/api/poets/add",
+    //   fd,
+    //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+    // );
+
+    await api.post(
+      "/poets/add",
       fd,
       { headers: { Authorization: localStorage.getItem("adminToken") } }
     );
@@ -269,8 +306,14 @@ const AdminDashboard = () => {
     setUpdatingPoet(true);   // ✅ LOADING START
 
     try {
-      await axios.put(
-        `http://localhost:5000/api/poets/update/${editingPoet._id}`,
+      // await axios.put(
+      //   `http://localhost:5000/api/poets/update/${editingPoet._id}`,
+      //   fd,
+      //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+      // );
+
+      await api.put(
+        `/poets/update/${editingPoet._id}`,
         fd,
         { headers: { Authorization: localStorage.getItem("adminToken") } }
       );
@@ -302,8 +345,21 @@ const AdminDashboard = () => {
   const addPoem = async (e) => {
     e.preventDefault();
 
-    await axios.post(
-      "http://localhost:5000/api/poems/add",
+    // await axios.post(
+    //   "http://localhost:5000/api/poems/add",
+    //   {
+    //     poetId,
+    //     title_en: titleEn,
+    //     title_hi: titleHi,
+    //     content_en: contentEn,
+    //     content_hi: contentHi,
+    //     type: poemType
+    //   },
+    //   { headers: { Authorization: localStorage.getItem("adminToken") } }
+    // );
+
+    await api.post(
+      "/poems/add",
       {
         poetId,
         title_en: titleEn,
@@ -384,23 +440,28 @@ const AdminDashboard = () => {
           {posters.map(p => (
             <div key={p._id} className="border p-2 rounded shadow-sm hover:shadow-md transition-shadow">
               <img
-                src={`http://localhost:5000${p.image}`}
+                // src={`http://localhost:5000${p.image}`}
+                src={`${import.meta.env.VITE_API_BASE}/${p.image.replace(/^\/+/, "")}`}
                 alt={`Poster ${p._id}`}
                 className="h-32 w-full object-cover rounded"
+                // onError={(e) => {
+                //   const parts = p.image ? p.image.split('/') : [];
+                //   const filename = parts.length ? parts[parts.length - 1] : '';
+                //   const tries = Number(e.target.dataset.try || 0);
+                //   if (tries === 0) {
+                //     e.target.dataset.try = 1;
+                //     e.target.src = `http://localhost:5000/uploads/posters/${filename}`;
+                //   } else if (tries === 1) {
+                //     e.target.dataset.try = 2;
+                //     e.target.src = `http://localhost:5000/uploads/${filename}`;
+                //   } else {
+                //     e.target.onerror = null;
+                //     e.target.src = 'https://via.placeholder.com/400x200?text=No+Image';
+                //   }
+                // }}
                 onError={(e) => {
-                  const parts = p.image ? p.image.split('/') : [];
-                  const filename = parts.length ? parts[parts.length - 1] : '';
-                  const tries = Number(e.target.dataset.try || 0);
-                  if (tries === 0) {
-                    e.target.dataset.try = 1;
-                    e.target.src = `http://localhost:5000/uploads/posters/${filename}`;
-                  } else if (tries === 1) {
-                    e.target.dataset.try = 2;
-                    e.target.src = `http://localhost:5000/uploads/${filename}`;
-                  } else {
-                    e.target.onerror = null;
-                    e.target.src = 'https://via.placeholder.com/400x200?text=No+Image';
-                  }
+                  e.target.onerror = null;
+                  e.target.src = "https://via.placeholder.com/400x200?text=No+Image";
                 }}
               />
 
@@ -453,8 +514,10 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {poets.map(p => (
                 <div key={p._id} className="border p-2 rounded">
+                  {/* <img
+                    src={`http://localhost:5000${p.image}`} */}
                   <img
-                    src={`http://localhost:5000${p.image}`}
+                    src={`${import.meta.env.VITE_API_BASE}/${p.image.replace(/^\/+/, "")}`}
                     className="h-24 w-full object-cover rounded"
                   />
                   <div className="text-sm mt-1">{p.name}</div>

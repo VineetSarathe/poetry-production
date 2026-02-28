@@ -1,6 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../../api";
 
 const AdminLogin = () => {
 
@@ -12,28 +13,50 @@ const AdminLogin = () => {
 
   const navigate = useNavigate();
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await axios.post(
+  //       "http://localhost:5000/api/auth/login",
+  //       { email, password }
+  //     );
+
+  //     localStorage.setItem("adminToken", res.data.token);
+
+  //     // quick success feedback
+  //     setLoading(false);
+  //     navigate("/admin/dashboard");
+
+  //   } catch (err) {
+  //     setLoading(false);
+  //     setError("Invalid credentials. Please try again.");
+  //   }
+  // };
+
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
-      );
+  try {
+    const res = await api.post("/auth/login", {
+      email,
+      password
+    });
 
-      localStorage.setItem("adminToken", res.data.token);
+    localStorage.setItem("adminToken", res.data.token);
 
-      // quick success feedback
-      setLoading(false);
-      navigate("/admin/dashboard");
+    setLoading(false);
+    navigate("/admin/dashboard");
 
-    } catch (err) {
-      setLoading(false);
-      setError("Invalid credentials. Please try again.");
-    }
-  };
+  } catch (err) {
+    setLoading(false);
+    setError("Invalid credentials. Please try again.");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">

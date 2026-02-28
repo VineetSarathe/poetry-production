@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { PoemsContext } from "../../context/PoemsContext";
+import api from "../../api";
 
 const TYPES = ["poem", "couplet", "couplets", "ghazal"];
 
@@ -25,7 +26,8 @@ const ManagePoems = () => {
     }, []);
 
     const loadPoets = async () => {
-        const res = await axios.get("http://localhost:5000/api/poets");
+        // const res = await axios.get("http://localhost:5000/api/poets");
+        const res = await api.get("/poets");
         setPoets(res.data);
     };
 
@@ -62,15 +64,25 @@ const ManagePoems = () => {
         setMessage("");
 
         try {
-            await axios.put(
-                `http://localhost:5000/api/poems/update/${selectedPoem._id}`,
-                selectedPoem,
-                {
-                    headers: {
-                        Authorization: localStorage.getItem("adminToken"),
-                    },
-                }
-            );
+            // await axios.put(
+            //     `http://localhost:5000/api/poems/update/${selectedPoem._id}`,
+            //     selectedPoem,
+            //     {
+            //         headers: {
+            //             Authorization: localStorage.getItem("adminToken"),
+            //         },
+            //     }
+            // );
+
+            await api.put(
+  `/poems/update/${selectedPoem._id}`,
+  selectedPoem,
+  {
+    headers: {
+      Authorization: localStorage.getItem("adminToken"),
+    },
+  }
+);
 
             setMessage("✅ Poem updated");
             fetchPoems();
