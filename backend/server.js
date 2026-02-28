@@ -35,7 +35,7 @@ app.use(
 app.use(express.json());
 
 // ⭐ IMAGE ACCESS
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
 
 connectDB();
 
