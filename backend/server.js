@@ -15,8 +15,13 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
+    origin: [
+      "http://localhost:5173",   // Vite frontend
+      "http://localhost:3000",   // optional
+      process.env.FRONTEND_URL   // production domain later
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
   })
 );
 
