@@ -8,59 +8,73 @@ export default function HeroSection() {
     const mountedRef = useRef(true);
 
     // Helper to test URL and return the working URL or null
-    const testUrls = async (candidateUrls) => {
-        for (const url of candidateUrls) {
-            try {
-                const res = await fetch(url, { method: "HEAD" });
-                if (res.ok) return url;
-            } catch (err) {
-                // ignore and try next
-            }
-        }
-        return null;
-    };
+    // const testUrls = async (candidateUrls) => {
+    //     for (const url of candidateUrls) {
+    //         try {
+    //             const res = await fetch(url, { method: "HEAD" });
+    //             if (res.ok) return url;
+    //         } catch (err) {
+    //             // ignore and try next
+    //         }
+    //     }
+    //     return null;
+    // };
 
     // Normalize and preload posters: check which URLs actually exist and replace poster.image with working path
     useEffect(() => {
         mountedRef.current = true;
+        // const load = async () => {
+        //     try {
+        //         const res = await fetch("http://localhost:5000/api/posters");
+        //         if (!res.ok) return setPosters([]);
+        //         const data = await res.json();
+
+        //         // For each poster, try the canonical path and fallbacks
+        //         const processed = await Promise.all(
+        //             data.map(async (p) => {
+        //                 const parts = p.image ? p.image.split("/") : [];
+        //                 const filename = parts.length ? parts[parts.length - 1] : "";
+
+        //                 const candidates = [
+        //                     `http://localhost:5000${p.image}`,
+        //                     `http://localhost:5000/uploads/posters/${filename}`,
+        //                     `http://localhost:5000/uploads/${filename}`,
+        //                 ].filter(Boolean);
+
+        //                 const working = await testUrls(candidates);
+
+        //                 if (working) {
+        //                     // store the path part (starting with /uploads... or original path)
+        //                     const urlObj = new URL(working);
+        //                     return { ...p, _publicUrl: working, image: urlObj.pathname };
+        //                 } else {
+        //                     return { ...p, _publicUrl: null };
+        //                 }
+        //             })
+        //         );
+
+        //         // Keep only posters that resolved to an actual image
+        //         const valid = processed.filter((p) => p._publicUrl);
+        //         if (mountedRef.current) setPosters(valid);
+        //     } catch (err) {
+        //         if (mountedRef.current) setPosters([]);
+        //     }
+        // };
+
         const load = async () => {
             try {
-                const res = await fetch("http://localhost:5000/api/posters");
+                const BASE = import.meta.env.VITE_API_BASE;
+
+                const res = await fetch(`${BASE}/api/posters`);
                 if (!res.ok) return setPosters([]);
+
                 const data = await res.json();
 
-                // For each poster, try the canonical path and fallbacks
-                const processed = await Promise.all(
-                    data.map(async (p) => {
-                        const parts = p.image ? p.image.split("/") : [];
-                        const filename = parts.length ? parts[parts.length - 1] : "";
-
-                        const candidates = [
-                            `http://localhost:5000${p.image}`,
-                            `http://localhost:5000/uploads/posters/${filename}`,
-                            `http://localhost:5000/uploads/${filename}`,
-                        ].filter(Boolean);
-
-                        const working = await testUrls(candidates);
-
-                        if (working) {
-                            // store the path part (starting with /uploads... or original path)
-                            const urlObj = new URL(working);
-                            return { ...p, _publicUrl: working, image: urlObj.pathname };
-                        } else {
-                            return { ...p, _publicUrl: null };
-                        }
-                    })
-                );
-
-                // Keep only posters that resolved to an actual image
-                const valid = processed.filter((p) => p._publicUrl);
-                if (mountedRef.current) setPosters(valid);
+                setPosters(data);
             } catch (err) {
-                if (mountedRef.current) setPosters([]);
+                setPosters([]);
             }
         };
-
         load();
 
         return () => {
@@ -89,29 +103,35 @@ export default function HeroSection() {
     };
 
     // Enhanced onError to try known fallbacks if something slipped through
-    const onError = (e) => {
-        const img = e.target;
-        const tries = Number(img.dataset.try || 0);
-        const parts = poster.image ? poster.image.split("/") : [];
-        const filename = parts.length ? parts[parts.length - 1] : "";
+    // const onError = (e) => {
+    //     const img = e.target;
+    //     const tries = Number(img.dataset.try || 0);
+    //     const parts = poster.image ? poster.image.split("/") : [];
+    //     const filename = parts.length ? parts[parts.length - 1] : "";
 
-        if (tries === 0) {
-            img.dataset.try = 1;
-            img.src = `http://localhost:5000/uploads/posters/${filename}`;
-        } else if (tries === 1) {
-            img.dataset.try = 2;
-            img.src = `http://localhost:5000/uploads/${filename}`;
-        } else {
-            img.onerror = null;
-            img.src = "https://via.placeholder.com/1200x520?text=No+Image";
-        }
-    };
+    //     if (tries === 0) {
+    //         img.dataset.try = 1;
+    //         img.src = `http://localhost:5000/uploads/posters/${filename}`;
+    //     } else if (tries === 1) {
+    //         img.dataset.try = 2;
+    //         img.src = `http://localhost:5000/uploads/${filename}`;
+    //     } else {
+    //         img.onerror = null;
+    //         img.src = "https://via.placeholder.com/1200x520?text=No+Image";
+    //     }
+    // };
+
+    const onError = (e) => {
+    e.target.onerror = null;
+    e.target.src = "https://via.placeholder.com/1200x520?text=No+Image";
+};
 
     return (
         <section className="relative w-full px-4 rounded-2xl overflow-hidden shadow-md -mt-2">
             <img
                 key={poster._id}
-                src={poster._publicUrl || `http://localhost:5000${poster.image}`}
+                // src={poster._publicUrl || `http://localhost:5000${poster.image}`}
+                src={poster.image}
                 alt="poster"
                 onLoad={onLoad}
                 onError={onError}
@@ -142,3 +162,5 @@ export default function HeroSection() {
         </section>
     );
 }
+
+
